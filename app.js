@@ -97,6 +97,8 @@ function renderStages() {
   });
 }
 
+function displayIcon(d){const t=(d?.aemet_text||"").toLowerCase();if(t.includes("tormenta"))return"⛈️";if(t.includes("lluvia")||t.includes("chubasco"))return"🌧️";if(t.includes("nublado")||t.includes("nuboso"))return"☁️";if(t.includes("niebla"))return"🌫️";if(t.includes("despejado"))return"☀️";return"🌤️"}
+function displayCondition(d){return d?.aemet_text||weatherText(d?.weather_code)}
 function renderSelected() {
   const s = selectedStage || getCurrentStage();
   const data = weatherData[s.n];
@@ -122,9 +124,9 @@ function renderSelected() {
         <span class="pill">${stageState(s)==="hoy" ? "ETAPA DE HOY" : stageState(s)==="pendiente" ? "PRÓXIMA ETAPA" : "ETAPA COMPLETADA"}</span>
         <h3>${s.from} → ${s.to}</h3>
         <p>${formatDate(s.date)} · ${s.km} km</p>
-        <div class="weather-summary">${Math.round(data.temperature_2m_min)}° / ${Math.round(data.temperature_2m_max)}° <span>· ${weatherText(data.weather_code)}</span></div>
+        <div class="weather-summary">${Math.round(data.temperature_2m_min)}° / ${Math.round(data.temperature_2m_max)}° <span>· ${displayCondition(data)}</span></div>
       </div>
-      <div class="selected-icon">${icon(data.weather_code)}</div>
+      <div class="selected-icon">${displayIcon(data)}</div>
     </div>
     <div class="forecast-big">
       <div><strong>${Math.round(data.temperature_2m_min)}°</strong><span>Mínima</span></div>
@@ -132,7 +134,7 @@ function renderSelected() {
       <div><strong>${data.precipitation_probability_max ?? "—"}%</strong><span>Prob. lluvia</span></div>
       <div><strong>${Math.round(data.windspeed_10m_max)} km/h</strong><span>Viento máx.</span></div>
     </div>
-    <p class="condition">${weatherText(data.weather_code)}</p>
+    <p class="condition">${displayCondition(data)}</p>
     <div class="selected-actions">
       <a href="${s.aemet}" target="_blank" rel="noopener">Ver AEMET de ${s.from} ↗</a>
     </div>
@@ -147,8 +149,8 @@ function renderAllWeather() {
     return `<article class="weather ${state==="hoy" ? "today-weather" : ""}">
       <div class="date">${s.label} · Etapa ${s.n}</div>
       <div class="route">${s.from} → ${s.to}</div>
-      <div class="wi">${icon(d.weather_code)}</div>
-      <div class="condition-small">${weatherText(d.weather_code)}</div>
+      <div class="wi">${displayIcon(d)}</div>
+      <div class="condition-small">${displayCondition(d)}</div>
       <div class="temp">${Math.round(d.temperature_2m_min)}° / ${Math.round(d.temperature_2m_max)}°</div>
       <div class="rain">💧 ${d.precipitation_probability_max ?? "—"}%</div>
       <div class="muted">💨 ${Math.round(d.windspeed_10m_max)} km/h</div>
@@ -169,24 +171,18 @@ function renderTodayHeader() {
     state==="hoy" ? "Esta es la etapa que toca hoy. Revisa la previsión antes de salir." :
     state==="pendiente" ? "La app cambiará automáticamente a esta etapa cuando llegue su fecha." :
     "Las cinco etapas previstas ya han pasado.";
-  document.querySelector("#todayIcon").textContent = d ? icon(d.weather_code) : "⏳";
+  document.querySelector("#todayIcon").textContent = d ? displayIcon(d) : "⏳";
 }
 
 async function fetchStageWeather(s) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&timezone=Europe%2FMadrid&forecast_days=16`;
-  const response = await fetch(url, {cache:"no-store"});
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const json = await response.json();
-  if (!json.daily || !Array.isArray(json.daily.time)) throw new Error("Respuesta meteorológica no válida");
-  const idx = json.daily.time.indexOf(s.date);
-  if (idx < 0) throw new Error(`La fecha ${s.date} todavía no está disponible`);
-  return {
-    weather_code: json.daily.weather_code[idx],
-    temperature_2m_min: json.daily.temperature_2m_min[idx],
-    temperature_2m_max: json.daily.temperature_2m_max[idx],
-    precipitation_probability_max: json.daily.precipitation_probability_max[idx],
-    windspeed_10m_max: json.daily.windspeed_10m_max[idx]
-  };
+  const response=await fetch(`/api/weather?stage=${s.n}`,{cache:"no-store"});
+  const json=await response.json();
+  if(!response.ok) throw new Error(json.error||"No se pudo consultar AEMET");
+  const d=json.dias.find(x=>x.fecha===s.date);
+  if(!d) throw new Error(`AEMET todavía no tiene la fecha ${s.date}`);
+  return {weather_code:null,temperature_2m_min:d.minima,temperature_2m_max:d.maxima,
+    precipitation_probability_max:d.probLluvia,windspeed_10m_max:d.vientoMax,
+    aemet_text:d.estadoCielo,source:"AEMET"};
 }
 
 async function loadWeather() {
