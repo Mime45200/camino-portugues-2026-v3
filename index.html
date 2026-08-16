@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b3b70">
+  <meta name="description" content="Camino Portugués 2026: etapas, alojamientos y previsión meteorológica actualizada.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <title>Camino Portugués · Mi Camino</title>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="eyebrow">CAMINO DE SANTIAGO · 2026</div>
+      <h1>Camino Portugués</h1>
+      <p>Tui → Santiago de Compostela · 5 etapas</p>
+    </div>
+    <button id="theme" class="icon-btn" aria-label="Cambiar tema">☾</button>
+  </header>
+
+  <main>
+    <section class="card today">
+      <div>
+        <span class="pill" id="todayLabel">PRÓXIMA ETAPA</span>
+        <h2 id="todayTitle">Cargando…</h2>
+        <p id="todayMeta"></p>
+        <p class="muted" id="todayStatus"></p>
+      </div>
+      <div class="big-icon" id="todayIcon">⏳</div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Previsión de la etapa</h2>
+        <button id="refresh" class="small-btn">Actualizar</button>
+      </div>
+      <p class="muted" id="updated">Consultando el tiempo…</p>
+      <div id="selectedWeather" class="selected-weather"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Tus etapas</h2>
+        <span class="muted">Toca una para verla</span>
+      </div>
+      <div id="stages" class="stages"></div>
+    </section>
+
+    <section class="card">
+      <h2>Previsión de todas las etapas</h2>
+      <div id="weather" class="weather-grid"></div>
+      <p class="source">
+        Previsión automática: Open-Meteo. Para contraste y avisos oficiales, cada etapa incluye enlace directo a AEMET.
+        AEMET publica predicción municipal hasta 7 días y predicción horaria hasta 48 horas. 
+      </p>
+    </section>
+
+    <section class="card tips">
+      <h2>Consejos del peregrino</h2>
+      <ul>
+        <li>La app selecciona automáticamente la etapa que corresponde a la fecha actual.</li>
+        <li>Antes de salir, revisa la previsión de esa etapa y los avisos oficiales.</li>
+        <li>Lleva agua, protección solar y una capa impermeable.</li>
+        <li>Si aparece riesgo de lluvia, calor o viento, consulta AEMET antes de comenzar.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <strong>Mi Camino</strong> · Actualización automática · Optimizada para móvil
+  </footer>
+<script src="/app.js"></script>
+</body>
+</html>
